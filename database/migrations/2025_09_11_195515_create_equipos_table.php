@@ -18,7 +18,7 @@ return new class extends Migration
         $table->string('modelo');
         $table->string('procesador');
         $table->string('ram');
-        $table->string('numeor_de_serie')->unique();
+        $table->string('numero_de_serie')->unique();
         $table->string('disco_duro');
         $table->string('sistema_operativo');
         $table->string('ip')->unique();

@@ -9,17 +9,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Equipo extends Model
 {
     protected $fillable = [
-        'nombre',
+        'usuario_id',
         'marca',
         'modelo',
-        'numero_serie',
-        'descripcion',
-        'activo',       // boolean: true = activo, false = baja
-        'usuario_id',
-    ];
-
-    protected $casts = [
-        'activo' => 'boolean',
+        'procesador',
+        'ram',
+        'numero_de_serie',
+        'disco_duro',
+        'sistema_operativo',
+        'ip',
+        'categoria',
+        'estado',
+        'descripcion_baja',
     ];
 
     /**
@@ -43,11 +44,11 @@ class Equipo extends Model
      */
     public function scopeActivos($query)
     {
-        return $query->where('activo', true);
+        return $query->where('estado', 'activo');
     }
 
     /**
-     * Scope para filtrar por marca (ejemplo de ayuda).
+     * Scope para filtrar por marca.
      */
     public function scopePorMarca($query, $marca)
     {

@@ -10,6 +10,7 @@ class Usuario extends Model
 {
     protected $fillable = [
         'nombre',
+        'apellido',
         'correo',
         'departamento_id',
     ];
@@ -24,7 +25,6 @@ class Usuario extends Model
 
     /**
      * Equipo asignado al usuario (1:1).
-     * Asumimos que cada usuario solo tiene una computadora.
      */
     public function equipo(): HasOne
     {

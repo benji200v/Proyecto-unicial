@@ -25,4 +25,3 @@ class Baja extends Model
         return $this->belongsTo(Equipo::class);
     }
 }
- 

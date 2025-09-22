@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Departamento extends Model
 {
-    protected $fillable = ['nombre'];
+    protected $fillable = [
+        'nombre',
+        'ubicacion',
+    ];
 
     /**
      * Usuarios que pertenecen al departamento.
@@ -20,11 +23,16 @@ class Departamento extends Model
 
     /**
      * Equipos del departamento (a través de los usuarios).
-     * Útil para consultar rápidamente equipos por área.
      */
     public function equipos(): HasManyThrough
     {
-        // (Equipo, Usuario, claveForaneaEnUsuarios, claveForaneaEnEquipos, localKeyDept, localKeyUsuario)
-        return $this->hasManyThrough(Equipo::class, Usuario::class, 'departamento_id', 'usuario_id', 'id', 'id');
+        return $this->hasManyThrough(
+            Equipo::class,
+            Usuario::class,
+            'departamento_id', // FK en usuarios
+            'usuario_id',      // FK en equipos
+            'id',              // PK en departamentos
+            'id'               // PK en usuarios
+        );
     }
 }
