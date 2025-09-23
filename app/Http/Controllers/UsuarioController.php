@@ -3,100 +3,60 @@
 namespace App\Http\Controllers;
 
 use App\Models\Usuario;
-use App\Models\Departamento;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class UsuarioController extends Controller
 {
-    /**
-     * Mostrar listado paginado de usuarios.
-     */
-    public function index(Request $request)
+    public function index()
     {
-        $usuarios = Usuario::with('departamento','equipo')
-                    ->orderBy('nombre')
-                    ->paginate(15);
-
-        return view('usuarios.index', compact('usuarios'));
+        // Listar todos los usuarios con su departamento y equipo
+        $usuarios = Usuario::with(['departamento', 'equipo'])->get();
+        return response()->json($usuarios);
     }
 
-    /**
-     * Mostrar formulario para crear un usuario.
-     */
-    public function create()
-    {
-        $departamentos = Departamento::orderBy('nombre')->get();
-        return view('usuarios.create', compact('departamentos'));
-    }
-
-    /**
-     * Almacenar un nuevo usuario.
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
-            'apellido' => 'required|string|max:150',
-            'correo' => 'required|email|max:150|unique:usuarios,correo',
+        // Validar y crear un nuevo usuario
+        $data = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'correo' => 'required|email|unique:usuarios,correo',
             'departamento_id' => 'required|exists:departamentos,id',
         ]);
 
-        Usuario::create($validated);
+        $usuario = Usuario::create($data);
 
-        return redirect()->route('usuarios.index')
-                         ->with('success', 'Usuario creado correctamente.');
+        return response()->json($usuario, 201);
     }
 
-    /**
-     * Mostrar un usuario (detalles).
-     */
-    public function show(Usuario $usuario)
+    public function show($id)
     {
-        $usuario->load('departamento','equipo');
-        return view('usuarios.show', compact('usuario'));
+        // Mostrar un usuario con sus relaciones
+        $usuario = Usuario::with(['departamento', 'equipo'])->findOrFail($id);
+        return response()->json($usuario);
     }
 
-    /**
-     * Mostrar formulario de edición.
-     */
-    public function edit(Usuario $usuario)
+    public function update(Request $request, $id)
     {
-        $departamentos = Departamento::orderBy('nombre')->get();
-        return view('usuarios.edit', compact('usuario','departamentos'));
-    }
+        $usuario = Usuario::findOrFail($id);
 
-    /**
-     * Actualizar usuario.
-     */
-    public function update(Request $request, Usuario $usuario)
-    {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:150',
-            'apellido' => 'required|string|max:150',
-            // permitir el mismo correo del usuario actual
-            'correo' => [
-                'required','email','max:150',
-                Rule::unique('usuarios','correo')->ignore($usuario->id),
-            ],
-            'departamento_id' => 'required|exists:departamentos,id',
+        $data = $request->validate([
+            'nombre' => 'sometimes|string|max:255',
+            'apellido' => 'sometimes|string|max:255',
+            'correo' => 'sometimes|email|unique:usuarios,correo,' . $usuario->id,
+            'departamento_id' => 'sometimes|exists:departamentos,id',
         ]);
 
-        $usuario->update($validated);
+        $usuario->update($data);
 
-        return redirect()->route('usuarios.index')
-                         ->with('success', 'Usuario actualizado correctamente.');
+        return response()->json($usuario);
     }
 
-    /**
-     * Eliminar usuario.
-     */
-    public function destroy(Usuario $usuario)
+    public function destroy($id)
     {
-        // Nota: según tus migraciones, al eliminar usuario sus equipos se eliminan (cascade).
+        $usuario = Usuario::findOrFail($id);
         $usuario->delete();
 
-        return redirect()->route('usuarios.index')
-                         ->with('success', 'Usuario eliminado correctamente.');
+        return response()->json(['message' => 'Usuario eliminado']);
     }
 }
